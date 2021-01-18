@@ -42,13 +42,10 @@ class Pixoo:
 
     def connect(self):
         """Open a connection to the Pixoo."""
-        # self.socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
         self.socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 
         try:
-            # self.socket.connect((self.host, self.port))
             self.socket.connect((self.host, self.port))
-            self.socket.setblocking(0)
             self.socket_errno = 0
         except socket.error as error:
             self.socket_errno = error.errno
@@ -81,13 +78,8 @@ class Pixoo:
 
     def receive(self, num_bytes=1024):
         """Receive n bytes of data from the Pixoo and put it in the input buffer. Returns the number of bytes received."""
-        ready = select.select([self.socket], [], [], 0.1)
-        if ready[0]:
-            data = self.socket.recv(num_bytes)
-            self.message_buf += data
-            return len(data)
-        else:
-            return 0
+        self.socket.recv(num_bytes)
+        return 1
 
     def send_raw(self, data):
         """Send raw data to the Pixoo."""
@@ -348,14 +340,24 @@ class Pixoo:
         while self.receive(512) == 512:
             self.drop_message_buffer()
 
-    def displayText(self,text):
+    def displayText(self,text,color=(230,0,0),icon=None):
+        print("display text")
         xsize = ImageFont.load_default().getsize(text)[0]+32
         im = Image.new(mode='RGB',size=(xsize,16))    
-        imDraw = ImageDraw.Draw(im)                                                        
-        imDraw.text((16,2), text, (237, 230, 211))
+        for i in range(16):
+            current_color = (int(color[0]/16*i),int(color[1]/16*i),int(color[2]/16*i))
+            shape = [(0, i), (xsize, i)] 
+            img1 = ImageDraw.Draw(im)   
+            img1.line(shape, fill =current_color, width = 0) 
+
+        imDraw = ImageDraw.Draw(im)           
+        imDraw.text((16,4), text, (30, 30, 30))
+        imDraw.text((16,3), text, (210, 200, 191))
+        im.save('banner.png')
         for i in range(xsize-15):
             crop_rectangle = (i, 0, i+16, 16)
             cropped_im = im.crop(crop_rectangle)
             cropped_im.save('current.png')
             self.show_image(os.path.join(os.path.dirname(__file__),"./current.png"))
-            time.sleep(1/20)   
+            time.sleep(1/17)  
+         
