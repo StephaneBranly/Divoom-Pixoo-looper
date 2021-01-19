@@ -337,7 +337,7 @@ class Pixoo:
         while self.receive(512) == 512:
             self.drop_message_buffer()
 
-    def displayText(self,text,color=(230,0,0),icon=None):
+    def displayText(self,text,color1=(230,0,0),color2=(0,250,250),icon=None):
         print("display text")
         delta=0
         if icon:
@@ -345,7 +345,7 @@ class Pixoo:
         xsize = ImageFont.load_default().getsize(text)[0]+32+delta
         im = Image.new(mode='RGB',size=(xsize,16))    
         for i in range(16):
-            current_color = (int(color[0]/16*i),int(color[1]/16*i),int(color[2]/16*i))
+            current_color = (int(color1[0]+((color2[0]-color1[0])/16*i)),int(color1[1]+((color2[1]-color1[1])/16*i)),int(color1[2]+((color2[2]-color1[2])/16*i)))
             shape = [(0, i), (xsize, i)] 
             img1 = ImageDraw.Draw(im)   
             img1.line(shape, fill =current_color, width = 0) 
