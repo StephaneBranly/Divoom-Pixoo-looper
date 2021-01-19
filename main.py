@@ -11,6 +11,6 @@ def main():
     while True:
         channel.check_views()
         leMonde.updateNews()
-        device.displayText("@stephane_branly : "+channel.subscribers+" abonnés",(190,10,10),(0,250,250),channel.defaultIcon())
-        device.displayText("Actu:"+leMonde.generateText(2),(190,10,255),(0,250,250),leMonde.defaultIcon())
+        device.displayText("@stephane_branly : "+channel.subscribers+" abonnés",(120,20,20),(45,45,45),channel.defaultIcon())
+        device.displayText("Actu:"+leMonde.generateText(2),(170,00,235),(0,110,110),leMonde.defaultIcon())
 main()

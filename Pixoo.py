@@ -25,14 +25,14 @@ class Pixoo:
     message_buf = []
     
     host = None
-    port = 1
+    port = 0
 
     def __init__(self, host=None, port=1, logger=None):
         self.type = "Pixoo"
         self.size = 16
         self.host = "11:75:58:BD:0C:34"
         self.port = 1
-        
+
         if logger is None:
             logger = logging.getLogger(self.type)
         self.logger = logger
@@ -46,7 +46,7 @@ class Pixoo:
 
         try:
             self.socket.connect((self.host, self.port))
-            self.socket.setblocking(0)
+            self.socket.setblocking(1)
             self.socket_errno = 0
         except bluetooth.BluetoothError as error :
             self.socket_errno = error.errno
@@ -80,8 +80,11 @@ class Pixoo:
 
     def receive(self, num_bytes=1024):
         """Receive n bytes of data from the Pixoo and put it in the input buffer. Returns the number of bytes received."""
-        self.socket.recv(num_bytes)
-        return 1
+        self.socket.settimeout(0.1)
+        data = self.socket.recv(num_bytes)
+        self.message_buf += data
+        return len(data)
+        
 
     def send_raw(self, data):
         """Send raw data to the Pixoo."""
@@ -96,10 +99,12 @@ class Pixoo:
         msg = self.make_message(payload)
         
         try:
-            return self.socket.send(bytes(msg))
+            self.receive(self.socket.send(bytes(msg)))
+            self.drop_message_buffer()
         except bluetooth.BluetoothError as error:
+            
             self.socket_errno = error.errno
-            raise
+            # raise
 
     def send_command(self, command, args=None):
         """Send command with optional arguments"""
@@ -320,6 +325,7 @@ class Pixoo:
                 frame = self.make_framepart(framePartsSize, index, framePart)
                 self.send_command("set animation frame", frame)
                 index += 1
+                print("multiple frames")
         
         elif framesCount == 1:
             """Sending as Image"""
@@ -361,5 +367,5 @@ class Pixoo:
             cropped_im = im.crop(crop_rectangle)
             cropped_im.save('current.png')
             self.show_image(os.path.join(os.path.dirname(__file__),"./current.png"))
-            time.sleep(1/17)  
+            time.sleep(1/17) 
          

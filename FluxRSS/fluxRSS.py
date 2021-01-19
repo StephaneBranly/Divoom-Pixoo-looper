@@ -17,7 +17,6 @@ class fluxRSS:
         render=""
         for entry in self.news_feed.entries:
             if(cpt<limit):
-                render=render+entry.title+" ; "
+                render=render+entry.title+" | "
             cpt=cpt+1
-        print(render)
-        return render.encode('utf-8').decode('latin-1')
+        return render.encode('cp1252').decode('latin-1')
