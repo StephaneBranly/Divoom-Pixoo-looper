@@ -1,6 +1,6 @@
 """Provides class Pixoo that encapsulates the Pixoo communication."""
 
-import logging, math, itertools, select, socket, time
+import logging, math, itertools, select, time
 import bluetooth
 from PIL import Image, ImageDraw, ImageFont
 import sys
@@ -46,14 +46,16 @@ class Pixoo:
 
         try:
             self.socket.connect((self.host, self.port))
+            self.socket.setblocking(0)
             self.socket_errno = 0
-        except socket.error as error:
+        except bluetooth.BluetoothError as error :
             self.socket_errno = error.errno
 
     def close(self):
         """Closes the connection to the Pixoo."""
         try:
-            self.socket.shutdown(socket.SHUT_RDWR)
+            self.socket.close()
+            self.socket = None
         except:
             pass
         self.socket.close()
@@ -63,7 +65,7 @@ class Pixoo:
         """Reconnects the connection to the Pixoo, if needed."""
         try:
             self.send_ping()
-        except socket.error as error:
+        except bluetooth.BluetoothError as error:
             self.socket_errno = error.errno
         
         retries = 1
@@ -85,16 +87,17 @@ class Pixoo:
         """Send raw data to the Pixoo."""
         try:
             return self.socket.send(data)
-        except socket.error as error:
+        except bluetooth.BluetoothError as error:
             self.socket_errno = error.errno
             raise
 
     def send_payload(self, payload):
         """Send raw payload to the Pixoo. (Will be escaped, checksumed and messaged between 0x01 and 0x02."""
         msg = self.make_message(payload)
+        
         try:
             return self.socket.send(bytes(msg))
-        except socket.error as error:
+        except bluetooth.BluetoothError as error:
             self.socket_errno = error.errno
             raise
 
@@ -168,14 +171,8 @@ class Pixoo:
         with Image.open(image) as img:
             
             picture_frames = []
-            # palette = img.getpalette()
-            # img.show()
             try:
                 while True:
-                    # if not img.getpalette():
-                    #     img.putpalette(palette)
-
-                    # duration = img.info['duration']
                     new_frame = Image.new('RGBA', img.size)
                     new_frame.paste(img, (0, 0), img.convert('RGBA'))
                     picture_frames.append([new_frame, 1])
@@ -342,17 +339,22 @@ class Pixoo:
 
     def displayText(self,text,color=(230,0,0),icon=None):
         print("display text")
-        xsize = ImageFont.load_default().getsize(text)[0]+32
+        delta=0
+        if icon:
+            delta = 25
+        xsize = ImageFont.load_default().getsize(text)[0]+32+delta
         im = Image.new(mode='RGB',size=(xsize,16))    
         for i in range(16):
             current_color = (int(color[0]/16*i),int(color[1]/16*i),int(color[2]/16*i))
             shape = [(0, i), (xsize, i)] 
             img1 = ImageDraw.Draw(im)   
             img1.line(shape, fill =current_color, width = 0) 
-
+        if icon:
+            iconIm = Image.open(icon)
+            im.paste(iconIm, (16,0),  iconIm.convert('RGBA'))
         imDraw = ImageDraw.Draw(im)           
-        imDraw.text((16,4), text, (30, 30, 30))
-        imDraw.text((16,3), text, (210, 200, 191))
+        imDraw.text((16+delta,4), text, (30, 30, 30))
+        imDraw.text((16+delta,3), text, (210, 200, 191))
         im.save('banner.png')
         for i in range(xsize-15):
             crop_rectangle = (i, 0, i+16, 16)

@@ -1,4 +1,5 @@
 import feedparser
+import os
 
 class fluxRSS:
     def __init__(self, url):
@@ -7,6 +8,9 @@ class fluxRSS:
 
     def updateNews(self):
         self.news_feed = feedparser.parse(self.url)
+
+    def defaultIcon(self):
+        return os.path.join(os.path.dirname(__file__),"./rss.png")
 
     def generateText(self,limit=5):
         cpt=0

@@ -1,13 +1,16 @@
 from bs4 import BeautifulSoup
 import urllib.request
 import re
-
+import os
 
 class Youtube:
     def __init__(self, url):
         self.url = url
         self.subscribers = 0
         self.view = 0
+
+    def defaultIcon(self):
+        return os.path.join(os.path.dirname(__file__),"./yt.png")
     
     def check_views(self):
         try:
