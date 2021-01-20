@@ -46,7 +46,7 @@ class Pixoo:
 
         try:
             self.socket.connect((self.host, self.port))
-            self.socket.setblocking(1)
+            self.socket.setblocking(0)
             self.socket_errno = 0
         except bluetooth.BluetoothError as error :
             self.socket_errno = error.errno
@@ -80,7 +80,7 @@ class Pixoo:
 
     def receive(self, num_bytes=1024):
         """Receive n bytes of data from the Pixoo and put it in the input buffer. Returns the number of bytes received."""
-        self.socket.settimeout(0.1)
+        self.socket.settimeout(0.2)
         data = self.socket.recv(num_bytes)
         self.message_buf += data
         return len(data)
@@ -102,7 +102,6 @@ class Pixoo:
             self.receive(self.socket.send(bytes(msg)))
             self.drop_message_buffer()
         except bluetooth.BluetoothError as error:
-            
             self.socket_errno = error.errno
             # raise
 
@@ -344,7 +343,6 @@ class Pixoo:
             self.drop_message_buffer()
 
     def displayText(self,text,color1=(230,0,0),color2=(0,250,250),icon=None):
-        print("display text")
         delta=0
         if icon:
             delta = 25
@@ -367,5 +365,4 @@ class Pixoo:
             cropped_im = im.crop(crop_rectangle)
             cropped_im.save('current.png')
             self.show_image(os.path.join(os.path.dirname(__file__),"./current.png"))
-            time.sleep(1/17) 
          
