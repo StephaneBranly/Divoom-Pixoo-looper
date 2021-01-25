@@ -8,6 +8,7 @@ class Meteo:
     def __init__(self, url):
         self.url = url
         self.temperature = '-10 °C'
+        self.sequence = 0
         
     def update(self):
         print("update data :")
@@ -46,6 +47,8 @@ class Meteo:
         im.paste(iconDeg, (12,8),  iconDeg.convert('RGBA'))
         iconThermo = Image.open(os.path.join(os.path.dirname(__file__),"./icons/thermo.png"))
         im.paste(iconThermo, (1,8),  iconThermo.convert('RGBA'))
+        iconPeunuageux= Image.open(os.path.join(os.path.dirname(__file__),"./icons/soleil"+str(self.sequence%2)+".png"))
+        im.paste(iconPeunuageux, (0,0),  iconPeunuageux.convert('RGBA'))
         font = ImageFont.truetype(os.path.join(os.path.dirname(__file__),"../src/pixelated.ttf"), size=8)
         imDraw = ImageDraw.Draw(im)  
         fontDeltaX = font.getsize(self.temperature)[0]+3
@@ -57,4 +60,7 @@ class Meteo:
 
     def getMeteoImage(self):
         return os.path.join(os.path.dirname(__file__),"./meteo.png")
-       
+
+    def animateImage(self):
+       self.sequence = self.sequence+1
+       self.generateImage()
