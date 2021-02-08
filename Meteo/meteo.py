@@ -9,7 +9,8 @@ class Meteo:
         self.url = url
         self.temperature = '-10 °C'
         self.sequence = 0
-        
+        self.update()
+
     def update(self):
         print("update data :")
         page  = urllib.request.urlopen(self.url).read()
@@ -52,14 +53,10 @@ class Meteo:
         font = ImageFont.truetype(os.path.join(os.path.dirname(__file__),"../src/pixelated.ttf"), size=8)
         imDraw = ImageDraw.Draw(im)  
         fontDeltaX = font.getsize(self.temperature)[0]+3
-        imDraw.text((15 - fontDeltaX,7), self.temperature, (230, 230, 230),font=font)
         imDraw.text((15 - fontDeltaX,8), self.temperature, (50, 50, 50),font=font)
+        imDraw.text((15 - fontDeltaX,7), self.temperature, (230, 230, 230),font=font)
         # imDraw.text((1,3), self.temperature, (210, 200, 191), font=font)
-
-        im.save(os.path.join(os.path.dirname(__file__),"./meteo.png"))  
-
-    def getMeteoImage(self):
-        return os.path.join(os.path.dirname(__file__),"./meteo.png")
+        return im  
 
     def animateImage(self):
        self.sequence = self.sequence+1

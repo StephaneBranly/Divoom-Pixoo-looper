@@ -7,6 +7,9 @@ import sys
 import os
 import time
 
+def wait(time=40):
+    for i in range(time*10000000):
+        a=0
 
 class Pixoo:
     """Class Pixoo encapsulates the Pixoo communication."""
