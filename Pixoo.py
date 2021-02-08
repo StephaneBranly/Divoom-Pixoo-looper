@@ -170,60 +170,56 @@ class Pixoo:
         header += [index]
         return header + framePart
 
-    def process_image(self, image):
+    def process_image(self, img):
         frames = []
-        with Image.open(image) as img:
-            
-            picture_frames = []
-            try:
-                while True:
-                    new_frame = Image.new('RGBA', img.size)
-                    new_frame.paste(img, (0, 0), img.convert('RGBA'))
-                    picture_frames.append([new_frame, 1])
+        picture_frames = []
+        try:
+            while True:
+                new_frame = Image.new('RGBA', img.size)
+                new_frame.paste(img, (0, 0), img.convert('RGBA'))
+                picture_frames.append([new_frame, 1])
 
-                    img.seek(img.tell() + 1)
-            except EOFError:
-                pass
-            
-            for pair in picture_frames:
-                picture_frame = pair[0]
-                time = pair[1]
-                
-                colors = []
-                pixels = [None]*self.size*self.size
-                
-                if time is None:
-                    time = 0
-                
-                for pos in itertools.product(range(self.size), range(self.size)):
-                    y, x = pos
-                    r, g, b, a = picture_frame.getpixel((x, y))
-                    if [r, g, b] not in colors:
-                        colors.append([r, g, b])
-                    color_index = colors.index([r, g, b])
-                    pixels[x + self.size * y] = color_index
-                
-                colorCount = len(colors)
-                if colorCount >= 256:
-                    colorCount = 0
-                
-                timeCode = [0x00, 0x00]
-                if len(picture_frames) > 1:
-                    timeCode = time.to_bytes(2, byteorder='little')
-                
-                frame = []
-                frame += timeCode
-                frame += [0x00]
-                frame += colorCount.to_bytes(1, byteorder='big')
-                for color in colors:
-                    frame += self.convert_color(color)
-                frame += self.process_pixels(pixels, colors)
-                frames.append(frame)
+                img.seek(img.tell() + 1)
+        except EOFError:
+            pass
         
+        for pair in picture_frames:
+            picture_frame = pair[0]
+            time = pair[1]
+            
+            colors = []
+            pixels = [None]*self.size*self.size
+            
+            if time is None:
+                time = 0
+            
+            for pos in itertools.product(range(self.size), range(self.size)):
+                y, x = pos
+                r, g, b, a = picture_frame.getpixel((x, y))
+                if [r, g, b] not in colors:
+                    colors.append([r, g, b])
+                color_index = colors.index([r, g, b])
+                pixels[x + self.size * y] = color_index
+            
+            colorCount = len(colors)
+            if colorCount >= 256:
+                colorCount = 0
+            
+            timeCode = [0x00, 0x00]
+            if len(picture_frames) > 1:
+                timeCode = time.to_bytes(2, byteorder='little')
+            
+            frame = []
+            frame += timeCode
+            frame += [0x00]
+            frame += colorCount.to_bytes(1, byteorder='big')
+            for color in colors:
+                frame += self.convert_color(color)
+            frame += self.process_pixels(pixels, colors)
+            frames.append(frame)
         result = []
         for frame in frames:
             result.append(self.make_frame(frame))
-        
         return result
 
     def process_pixels(self, pixels, colors):
@@ -305,9 +301,13 @@ class Pixoo:
         args += blue.to_bytes(2, byteorder='little')
         self.send_command("set view", args)
 
-    def show_image(self, file):
+    def show_image(self, image, PILimage=False):
+        frames = None
         """Show image or animation on the Pixoo"""
-        frames = self.process_image(file)
+        if PILimage==True:
+            frames = self.process_image(image)
+        else:
+            frames = self.process_image(Image.open(image))
         framesCount = len(frames)
         
         if framesCount > 1:
@@ -359,10 +359,10 @@ class Pixoo:
         imDraw = ImageDraw.Draw(im)           
         imDraw.text((16+delta,4), text, (30, 30, 30))
         imDraw.text((16+delta,3), text, (210, 200, 191))
-        im.save('banner.png')
         for i in range(xsize-15):
             crop_rectangle = (i, 0, i+16, 16)
             cropped_im = im.crop(crop_rectangle)
-            cropped_im.save('current.png')
-            self.show_image(os.path.join(os.path.dirname(__file__),"./current.png"))
+            self.show_image(cropped_im,True)
+            for j in range(400000):
+                a = 0
          

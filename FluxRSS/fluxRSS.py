@@ -5,6 +5,7 @@ class fluxRSS:
     def __init__(self, url):
         self.url = url
         self.news_feed=None
+        self.updateNews()
 
     def updateNews(self):
         self.news_feed = feedparser.parse(self.url)

@@ -10,6 +10,7 @@ class Manille:
         self.cl_team2 = color2
         self.cl_bonus1 = bonusColor1
         self.cl_bonus2 = bonusColor2
+        self.generateImage()
 
     def generateImage(self,score1=0,score2=0):
         im = Image.new(mode='RGB',size=(16,16))    
@@ -45,8 +46,8 @@ class Manille:
             im.save(os.path.join(os.path.dirname(__file__),"./manille.png"))  
         else:
             im.save(os.path.join(os.path.dirname(__file__),"./manilleUpd.png"))  
+            
     def waitUpdate(self):
-        print("updated")
         delta_score = input('Indicate score :')
         team = input('Indicate team (1 or 2) :')
         if int(team)==1:

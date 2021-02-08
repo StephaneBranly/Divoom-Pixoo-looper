@@ -8,11 +8,12 @@ class Youtube:
         self.url = url
         self.subscribers = 0
         self.view = 0
+        self.check_data()
 
     def defaultIcon(self):
         return os.path.join(os.path.dirname(__file__),"./yt.png")
     
-    def check_views(self):
+    def check_data(self):
         try:
             page  = urllib.request.urlopen(self.url).read()
             string_subs = re.findall(r"[0-9]*\sabonnés", page.decode("utf-8")) 
