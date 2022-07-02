@@ -22,79 +22,79 @@ class Pixoo:
         "set animation frame": 0x49
     }
 
-    logger = None
-    socket = None
-    socket_errno = 0
-    message_buf = []
+    __logger = None
+    __socket = None
+    __socket_errno = 0
+    __message_buf = []
     
-    host = None
-    port = 0
+    __host = None
+    __port = 0
 
     def __init__(self, host=None, port=1, logger=None):
-        self.type = "Pixoo"
-        self.size = 16
-        self.host = "11:75:58:BD:0C:34"
-        self.port = 1
+        self.__type = "Pixoo"
+        self.__size = 16
+        self.__host = host
+        self.__port = port
 
         if logger is None:
-            logger = logging.getLogger(self.type)
-        self.logger = logger
+            logger = logging.getLogger(self.__type)
+        self.__logger = logger
 
     def __exit__(self, type, value, traceback):
         self.close()
 
     def connect(self):
         """Open a connection to the Pixoo."""
-        self.socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+        self.__socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 
         try:
-            self.socket.connect((self.host, self.port))
-            self.socket.setblocking(0)
-            self.socket_errno = 0
+            self.__socket.connect((self.__host, self.__port))
+            self.__socket.setblocking(0)
+            self.__socket_errno = 0
         except bluetooth.BluetoothError as error :
-            self.socket_errno = error.errno
+            self.__socket_errno = error.errno
 
     def close(self):
         """Closes the connection to the Pixoo."""
         try:
-            self.socket.close()
-            self.socket = None
+            self.__socket.close()
+            self.__socket = None
         except:
             pass
-        self.socket.close()
-        self.socket = None
+        self.__socket.close()
+        self.__socket = None
 
     def reconnect(self):
         """Reconnects the connection to the Pixoo, if needed."""
         try:
             self.send_ping()
         except bluetooth.BluetoothError as error:
-            self.socket_errno = error.errno
+            self.__socket_errno = error.errno
         
         retries = 1
-        while self.socket_errno > 0 and retries <= 5:
-            self.logger.warning("Pixoo connection lost (errno = {0}). Trying to reconnect for the {1} time.".format(self.socket_errno, retries))
+        while self.__socket_errno > 0 and retries <= 5:
+            self.__logger.warning("Pixoo connection lost (errno = {0}). Trying to reconnect for the {1} time.".format(self.__socket_errno, retries))
             if retries > 1:
                 time.sleep(1 * retries)
-            if not self.socket is None:
+            if not self.__socket is None:
                 self.close()
             self.connect()
             retries += 1
 
     def receive(self, num_bytes=1024):
         """Receive n bytes of data from the Pixoo and put it in the input buffer. Returns the number of bytes received."""
-        self.socket.settimeout(0.2)
-        data = self.socket.recv(num_bytes)
-        self.message_buf += data
+        self.__socket.settimeout(0.2)
+        data = self.__socket.recv(num_bytes)
+        self.__message_buf += data
         return len(data)
         
 
     def send_raw(self, data):
         """Send raw data to the Pixoo."""
         try:
-            return self.socket.send(data)
+            return self.__socket.send(data)
         except bluetooth.BluetoothError as error:
-            self.socket_errno = error.errno
+            self.__socket_errno = error.errno
             raise
 
     def send_payload(self, payload):
@@ -102,10 +102,10 @@ class Pixoo:
         msg = self.make_message(payload)
         
         try:
-            self.receive(self.socket.send(bytes(msg)))
+            self.receive(self.__socket.send(bytes(msg)))
             self.drop_message_buffer()
         except bluetooth.BluetoothError as error:
-            self.socket_errno = error.errno
+            self.__socket_errno = error.errno
             # raise
 
     def send_command(self, command, args=None):
@@ -123,7 +123,7 @@ class Pixoo:
 
     def drop_message_buffer(self):
         """Drop all dat currently in the message buffer,"""
-        self.message_buf = []
+        self.__message_buf = []
     
     def checksum(self, payload):
         """Compute the payload checksum. Returned as list with LSM, MSB"""
@@ -139,7 +139,7 @@ class Pixoo:
 
     def escape_payload(self, payload):
         """Escaping is not needed anymore as some smarter guys found out"""
-        if self.type == "Pixoo":
+        if self.__type == "Pixoo":
             return payload
         
         """Escape the payload. It is not allowed to have occurrences of the codes
@@ -191,18 +191,18 @@ class Pixoo:
             time = pair[1]
             
             colors = []
-            pixels = [None]*self.size*self.size
+            pixels = [None]*self.__size*self.__size
             
             if time is None:
                 time = 0
             
-            for pos in itertools.product(range(self.size), range(self.size)):
+            for pos in itertools.product(range(self.__size), range(self.__size)):
                 y, x = pos
                 r, g, b, a = picture_frame.getpixel((x, y))
                 if [r, g, b] not in colors:
                     colors.append([r, g, b])
                 color_index = colors.index([r, g, b])
-                pixels[x + self.size * y] = color_index
+                pixels[x + self.__size * y] = color_index
             
             colorCount = len(colors)
             if colorCount >= 256:
@@ -307,7 +307,7 @@ class Pixoo:
     def show_image(self, image, PILimage=False):
         frames = None
         """Show image or animation on the Pixoo"""
-        if PILimage==True:
+        if PILimage == True:
             frames = self.process_image(image)
         else:
             frames = self.process_image(Image.open(image))
@@ -346,6 +346,9 @@ class Pixoo:
             self.drop_message_buffer()
 
     def displayText(self,text,color1=(230,0,0),color2=(0,250,250),icon=None):
+        """
+        Display text on the Pixoo
+        """
         delta=0
         if icon:
             delta = 25
@@ -365,7 +368,7 @@ class Pixoo:
         for i in range(xsize-15):
             crop_rectangle = (i, 0, i+16, 16)
             cropped_im = im.crop(crop_rectangle)
-            self.show_image(cropped_im,True)
+            self.show_image(cropped_im, True)
             for j in range(400000):
                 a = 0
          
