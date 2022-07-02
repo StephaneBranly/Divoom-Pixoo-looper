@@ -1,9 +1,9 @@
-class TemplateModule():
+class TemplateModule:
     def __init__(self, name):
         self.__name = name
 
     def render(self, device):
-        raise NotImplementedError 
+        raise NotImplementedError
 
     def get_name(self):
         """

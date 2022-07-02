@@ -1,6 +1,7 @@
 import manager.Pixoo as p
 
-class Manager():
+
+class Manager:
     __modules = []
     __device = None
 
