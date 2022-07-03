@@ -357,7 +357,7 @@ class Pixoo:
         while self.receive(512) == 512:
             self.drop_message_buffer()
 
-    def displayText(self, text, color1=(230, 0, 0), color2=(0, 250, 250), icon=None):
+    def display_text(self, text, color1=(230, 0, 0), color2=(0, 250, 250), icon=None, text_shadow=(30, 30, 30), text_color=(210, 200, 191)):
         """
         Display text on the Pixoo
         """
@@ -379,8 +379,8 @@ class Pixoo:
             iconIm = Image.open(icon)
             im.paste(iconIm, (16, 0), iconIm.convert("RGBA"))
         imDraw = ImageDraw.Draw(im)
-        imDraw.text((16 + delta, 4), text, (30, 30, 30))
-        imDraw.text((16 + delta, 3), text, (210, 200, 191))
+        imDraw.text((16 + delta, 4), text, text_shadow)
+        imDraw.text((16 + delta, 3), text, text_color)
         for i in range(xsize - 15):
             crop_rectangle = (i, 0, i + 16, 16)
             cropped_im = im.crop(crop_rectangle)

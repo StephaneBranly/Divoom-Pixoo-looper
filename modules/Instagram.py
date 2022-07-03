@@ -1,12 +1,13 @@
+from lib2to3.pytree import Base
 import urllib.request
 import re
 import os
 
 from modules.TemplateModule import TemplateModule
 
-class Youtube(TemplateModule):
+class Instagram(TemplateModule):
     def __init__(self, settings):
-        TemplateModule.__init__(self, "Youtube")
+        TemplateModule.__init__(self, "Instagram")
         self.__url = settings["url"]
         self.__subscribers = 0
         self.check_data()
@@ -14,14 +15,14 @@ class Youtube(TemplateModule):
     def render(self, device):
         device.display_text(
             f"{self.__subscribers} abonnés",
-            (120, 20, 20),
-            (45, 45, 45),
+            (201, 0, 108),
+            (255, 136, 0),
             self.default_icon(),
         )
         return True
 
     def default_icon(self):
-        return os.path.join(os.path.dirname(__file__), "src/youtube.png")
+        return os.path.join(os.path.dirname(__file__), "src/instagram.png")
 
     def check_data(self):
         try:

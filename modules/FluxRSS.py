@@ -12,20 +12,21 @@ class FluxRSS(TemplateModule):
         self.update_news()
 
     def render(self, device):
-        device.displayText(
-            f"Actu: {self.generateText(3)}",
+        device.display_text(
+            f"Actu: {self.generate_text(1)}",
             (170, 00, 235),
             (0, 110, 110),
-            self.defaultIcon(),
+            self.default_icon(),
         )
+        return True
 
     def update_news(self):
         self.__news_feed = feedparser.parse(self.__url)
 
-    def defaultIcon(self):
+    def default_icon(self):
         return os.path.join(os.path.dirname(__file__), "src/rss.png")
 
-    def generateText(self, limit=5):
+    def generate_text(self, limit=5):
         cpt = 0
         render = ""
         for entry in self.__news_feed.entries:
